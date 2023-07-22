@@ -20,8 +20,11 @@ const Editor = ({ onChange, name, value }) => {
     const [editorInstance, setEditorInstance] = useState();
     const [mediaLibBlockIndex, setMediaLibBlockIndex] = useState(-1);
     const [isMediaLibOpen, setIsMediaLibOpen] = useState(false);
-    const [toolpack, setToolpack] = useState(null);
+
+    const [toolpackModule, setToolpackModule] = useState(null);
+
     const [tools, setTools] = useState(null);
+
     const [toolpackError, setToolpackError] = useState(null);
 
     const createEjsObject = () => {
@@ -60,14 +63,7 @@ const Editor = ({ onChange, name, value }) => {
                 }
             })
             .then(module => {
-                try {
-                    const toolpackCreator = module.default;
-                    const tp = toolpackCreator(createEjsObject());
-                    setToolpack(tp);
-                    setToolpackError(null);
-                } catch(err) {
-                    throw new Error(`Failed to hydrate toolpack - ${err.message}`)
-                }
+                setToolpackModule(module);
             })
             .catch((err) => {
                 setToolpackError(err.message);
@@ -76,11 +72,18 @@ const Editor = ({ onChange, name, value }) => {
     }, [])
 
     useEffect(() => {
-        if (tools !== null) { return; }
-        if (toolpack === null) { return; }
-        setTools({...toolpack})
-    }, [toolpack])
+        // we need the module
+        if (toolpackModule === null) { return; }
 
+        try {
+            const toolCreator = toolpackModule.createTools;
+            const tls = toolCreator(createEjsObject());
+            setTools(tls);
+        } catch(err) {
+            setToolpackError(`Failed to hydrate toolpack tools - ${err.message}`);
+        }
+
+    }, [toolpackModule])
 
   const mediaLibToggleFunc = useCallback(getToggleFunc({
     openStateSetter: setIsMediaLibOpen,
@@ -138,11 +141,21 @@ const Editor = ({ onChange, name, value }) => {
                 tools={tools}
                 onInitialize={editor => {
                     const api = editor.dangerouslyLowLevelInstance;
+
                     api.isReady.then(() => {
                         setEditorInstance(api);
-                        if(value && JSON.parse(value).blocks.length) {
-                            api.render(JSON.parse(value))
+
+                        const hasInitialData = value && JSON.parse(value).blocks.length > 0;
+                        const initialData = hasInitialData ? JSON.parse(value) : null;
+
+                        if (toolpackModule !== null && toolpackModule.customiseInstance !== undefined) {
+                            toolpackModule.customiseInstance(api, initialData);
                         }
+
+                        if(hasInitialData) {
+                            api.render(initialData)
+                        }
+                        
                     })
                 }}
             />

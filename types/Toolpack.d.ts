@@ -1,5 +1,6 @@
 import type {AxiosRequestConfig, AxiosResponse} from 'axios';
 import type { BlockToolConstructable, ToolSettings } from "@editorjs/editorjs"
+import type EditorJS from '@editorjs/editorjs';
 
 export type StrapiEditorJS = {
     pluginEndpoint: string,
@@ -12,11 +13,14 @@ export type StrapiEditorJS = {
     }
     mediaLib: {
         toggle: (blockIndex: number) => void
-    }
+    },
+    initialData: any
 }
 
 export type ToolMap = {
     [toolName: string]: BlockToolConstructable | ToolSettings;
 }
 
-export type CreateToolsFunction = (ejs: StrapiEditorJS) => ToolMap
+export type CreateToolsFunction = (ejs: StrapiEditorJS) => ToolMap;
+
+export type InstanceCustomFunction = (ejsInstance: EditorJS, initialData: unknown) => void;

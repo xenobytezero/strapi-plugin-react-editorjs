@@ -1,24 +1,25 @@
-import type {AxiosRequestConfig, AxiosResponse} from 'axios';
+import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 import type { BlockToolConstructable, ToolSettings } from "@editorjs/editorjs"
 import type EditorJS from '@editorjs/editorjs';
+import type { FetchClient } from '@strapi/strapi/admin'
 
 export type StrapiEditorJS = {
     pluginEndpoint: string,
-    authToken: string,
-    fetchClient: {
-        get<T = any, R = AxiosResponse<T>, D = any>(url: string, config?: AxiosRequestConfig<D>): Promise<R>;
-        put<T = any, R = AxiosResponse<T>, D = any>(url: string, data?: D, config?: AxiosRequestConfig<D>): Promise<R>; 
-        post<T = any, R = AxiosResponse<T>, D = any>(url: string, data?: D, config?: AxiosRequestConfig<D>): Promise<R>;
-        del<T = any, R = AxiosResponse<T>, D = any>(url: string, config?: AxiosRequestConfig<D>): Promise<R>;
-    }
-    mediaLib: {
+    authToken: string | null,
+    fetchClient: FetchClient
+    mediaLib?: {
         toggle: (blockIndex: number) => void
     },
-    initialData: any
+    initialData?: unknown
 }
 
 export type ToolMap = {
-    [toolName: string]: BlockToolConstructable | ToolSettings;
+    [toolName: string]: ToolConstructable | ToolSettings;
+}
+
+export type ToolpackModule = {
+    createTools: CreateToolsFunction
+    customiseInstance?: InstanceCustomFunction
 }
 
 export type CreateToolsFunction = (ejs: StrapiEditorJS) => ToolMap;

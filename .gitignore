@@ -8,3 +8,5 @@ stats.json
 npm-debug.log
 .idea
 .yarn
+dist
+dist-types

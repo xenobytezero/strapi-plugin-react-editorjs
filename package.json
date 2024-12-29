@@ -18,6 +18,7 @@
     "dependencies": {
         "@editorjs/editorjs": "2.30.7",
         "@editorjs/image": "2.10.1",
+        "@editorjs/paragraph": "2.11.7",
         "@strapi/design-system": "2.0.0-rc.14",
         "@strapi/icons": "2.0.0-rc.14",
         "axios": "^1.4.0",
@@ -31,9 +32,9 @@
         "@semantic-release/git": "^10.0.1",
         "@strapi/design-system": "2.0.0-rc.14",
         "@strapi/sdk-plugin": "5.2.7",
-        "@strapi/strapi": "5.5.0",
-        "@strapi/upload": "5.5.0",
-        "@strapi/utils": "5.5.0",
+        "@strapi/strapi": "5.6.0",
+        "@strapi/upload": "5.6.0",
+        "@strapi/utils": "5.6.0",
         "@types/koa": "^2.13.5",
         "@types/react": "^18.3.13",
         "cz-conventional-changelog": "^3.3.0",
@@ -91,7 +92,7 @@
     ],
     "peerDependencies": {
         "@strapi/sdk-plugin": "5.2.7",
-        "@strapi/strapi": "5.5.0",
+        "@strapi/strapi": "5.6.0",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
         "react-router-dom": "^6.28.0",
@@ -105,9 +106,10 @@
         "url": "https://github.com/xenobytezero/strapi-plugin-react-editorjs"
     },
     "scripts": {
-        "build": "strapi-plugin build",
+        "build": "strapi-plugin build --sourcemap",
         "verify": "strapi-plugin verify",
-        "watch": "strapi-plugin watch"
+        "watch": "strapi-plugin watch",
+        "types": "tsc --project ./types"
     },
     "strapi": {
         "icon": "plug",

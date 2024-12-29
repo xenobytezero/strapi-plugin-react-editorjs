@@ -1,7 +1,8 @@
-import type { AxiosRequestConfig, AxiosResponse } from 'axios';
-import type { BlockToolConstructable, ToolSettings } from "@editorjs/editorjs"
+import type { ToolConstructable, ToolSettings } from "@editorjs/editorjs"
 import type EditorJS from '@editorjs/editorjs';
-import type { FetchClient } from '@strapi/strapi/admin'
+import type { getFetchClient } from '@strapi/strapi/admin'
+
+export type FetchClient = ReturnType<typeof getFetchClient>
 
 export type StrapiEditorJS = {
     pluginEndpoint: string,

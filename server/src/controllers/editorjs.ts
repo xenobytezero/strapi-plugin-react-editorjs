@@ -10,6 +10,8 @@ import pluginId from '../../../admin/src/pluginId';
 
 import type { Core } from '@strapi/strapi';
 import type { Config } from '../../../types/Config';
+import type { GET_ToolpackValid } from '../../../types/Endpoints';
+import type { ToolpackService } from '../services/toolpack';
 
 // ---------------------------
 
@@ -143,7 +145,7 @@ export class EditorJSController {
 
     async checkToolpackValid(ctx: Context) {
 
-        const toolpackService = strapi.plugin(pluginId).service('toolpack');
+        const toolpackService = strapi.plugin(pluginId).service<ToolpackService>('toolpack');
         const toolpackPackageName = toolpackService.getToolpackPackageName();
 
         const ret = toolpackService.packageIsValid(toolpackPackageName);
@@ -152,7 +154,11 @@ export class EditorJSController {
             ctx.response.status = 200;
         } else {
             ctx.response.status = 400;
-            ctx.response.body = ret.reason;
+            ctx.response.body = {
+                error: {
+                    message: ret.reason
+                }
+            } as GET_ToolpackValid
         }
 
     }

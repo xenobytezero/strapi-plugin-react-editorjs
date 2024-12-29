@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
-import { createReactEditorJS } from 'react-editor-js'
+import ReactEditorJS from '@react-editor-js/client'
 import EditorJS, { EditorConfig, OutputData } from '@editorjs/editorjs'
-import { FieldValue, useAuth, useFetchClient } from '@strapi/strapi/admin'
+import { FetchError, FieldValue, useAuth, useFetchClient } from '@strapi/strapi/admin'
 import { Typography as Typ, EmptyStateLayout, Flex, Loader } from '@strapi/design-system';
 
 import pluginId from '../../pluginId';
@@ -10,7 +10,7 @@ import { changeFunc } from '../medialib/utils';
 
 import { ToolMap, type StrapiEditorJS, type ToolpackModule } from '../../../../types/Toolpack';
 
-const EditorJs = createReactEditorJS();
+import type { GET_ToolpackValid } from '../../../../types/Endpoints';
 
 export type EditorProps = {
     field: FieldValue
@@ -46,32 +46,19 @@ export const Editor = ({ field, name }: EditorProps) => {
     }
 
     useEffect(() => {
-        // check if the toolpack on the server is valid
 
-        fetchClient.get(
-            `${process.env.STRAPI_ADMIN_BACKEND_UR}/${pluginId}/toolpackValid`,
-            // we want to check the response rather than just throw
-            { validateStatus: () => true }
+        // check if the toolpack on the server is valid
+        fetchClient.get<GET_ToolpackValid>(
+            `${process.env.STRAPI_ADMIN_BACKEND_URL}${pluginId}/toolpackValid`
         )
             .then((resp) => {
-
                 // if it's valid, load the toolpack
-                if (resp.status === 200) {
-                    return import(/*webpackIgnore: true*/`${process.env.STRAPI_ADMIN_BACKEND_UR}/${pluginId}/toolpack`);
-
-                    // if it's not valid, the reason is in the body
-                } else if (resp.status === 400) {
-                    throw new Error(resp.data)
-
-                    // for something unexpected, then throw an unexpected error
-                } else {
-                    throw new Error('Unexpected Error.');
-                }
+                return import(/* @vite-ignore */`${process.env.STRAPI_ADMIN_BACKEND_URL}${pluginId}/toolpack`);
             })
             .then(module => {
                 setToolpackModule(module);
             })
-            .catch((err) => {
+            .catch((err: FetchError) => {
                 setToolpackError(err.message);
             })
 
@@ -146,7 +133,7 @@ export const Editor = ({ field, name }: EditorProps) => {
             />
         }
 
-        return <EditorJs
+        return <ReactEditorJS
             onChange={(api, ev) => {
                 api.saver.save().then(newData => {
                     if (!newData.blocks.length) {

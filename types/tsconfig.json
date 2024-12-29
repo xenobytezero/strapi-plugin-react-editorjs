@@ -1,0 +1,14 @@
+{
+  "include": [
+    "."
+  ],
+  "compilerOptions": {
+    "outDir": "../dist-types",
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "skipLibCheck": true
+  }
+}

@@ -21,11 +21,13 @@
         "@editorjs/paragraph": "2.11.7",
         "@strapi/design-system": "2.0.0-rc.14",
         "@strapi/icons": "2.0.0-rc.14",
+        "@types/typography": "^0.16.8",
         "axios": "^1.4.0",
         "classnames": "^2.3.1",
         "get-file-object-from-local-path": "1.0.2",
         "open-graph-scraper": "4.9.2",
-        "react-intl": "^7.0.1"
+        "react-intl": "^7.0.1",
+        "typography": "^0.16.24"
     },
     "devDependencies": {
         "@semantic-release/changelog": "^6.0.1",
@@ -66,7 +68,8 @@
             "import": "./dist/server/index.mjs",
             "require": "./dist/server/index.js",
             "default": "./dist/server/index.js"
-        }
+        },
+        "./types/*": "./dist-types/*.d.ts"
     },
     "files": [
         "dist"

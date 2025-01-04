@@ -1,5 +1,5 @@
-import { FormattedFile } from './component';
-import EditorJS from '@editorjs/editorjs'
+import type EditorJS from '@editorjs/editorjs'
+import type { FormattedFile } from '../../../../types/Toolpack'
 
 // -------------------------------------------
 // -------------------------------------------

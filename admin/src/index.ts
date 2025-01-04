@@ -1,18 +1,17 @@
 import pluginPkg from '../../package.json';
-import Wysiwyg, { type WysiwygProps } from './components/Wysiwyg';
 import pluginId from './pluginId';
 import { PluginIcon } from './components/PluginIcon';
 
 import type { StrapiApp } from '@strapi/strapi/admin';
+//import Editor from './components/Input';
 
 export default {
     register(app: StrapiApp) {
 
-        app.addFields({
-            type: 'wysiwyg',
-            Component: Wysiwyg as React.FC<Partial<WysiwygProps>>,
+        app.registerPlugin({
+            id: pluginId,
+            name: pluginPkg.strapi.name
         });
-
 
         app.customFields.register({
             name: "editorjs",
@@ -20,7 +19,7 @@ export default {
             type: "json",
             icon: PluginIcon,
             components: {
-                Input: () => import("./components/Wysiwyg") as any
+                Input: async () => import("./components/Input") as any
             },
             intlLabel: {
                 id: `${pluginId}.color.label`,
@@ -32,11 +31,10 @@ export default {
             },
         })
 
-
-        app.registerPlugin({
-            id: pluginId,
-            name: pluginPkg.strapi.name
-        });
+        // app.addFields({
+        //     type: 'wysiwyg',
+        //     Component: Editor as React.FC<unknown>,
+        // });
 
     }
 };

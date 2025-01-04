@@ -1,22 +1,17 @@
 import { FC } from 'react';
 import { useStrapiApp } from '@strapi/strapi/admin';
 import { Schema } from '@strapi/strapi';
-import { type File } from '../../../../types/Strapi';
+import type { File } from '../../../../types/Strapi';
+import type { FormattedFile } from '../../../../types/Toolpack';
 
 // ---------------------
 
 export type MediaLibComponentProps = {
-    isOpen: boolean,
     onChange: (files: FormattedFile[]) => void,
-    onToggle: () => void
+    onClose: () => void
 }
 
-export type FormattedFile = Pick<File, 'width' | 'height' | 'size' | 'mime' | 'formats'> & {
-    url: string
-    alt: string
-}
-
-export type MediaLibraryDialogProps = Partial<{
+type MediaLibraryDialogProps = Partial<{
     allowedTypes: Schema.Attribute.MediaKind[];
     onClose: () => void;
     onSelectAssets: (_images: Schema.Attribute.MediaValue<true>) => void;
@@ -24,7 +19,7 @@ export type MediaLibraryDialogProps = Partial<{
 
 // ---------------------
 
-const MediaLibComponent: FC<MediaLibComponentProps> = ({ isOpen, onChange, onToggle }) => {
+const MediaLibComponent: FC<MediaLibComponentProps> = ({ onChange, onClose }) => {
 
     const components = useStrapiApp('MediaLibComponent', (state) => state.components);
     const MediaLibraryDialog = components['media-library'] as React.FC<MediaLibraryDialogProps>
@@ -32,7 +27,7 @@ const MediaLibComponent: FC<MediaLibComponentProps> = ({ isOpen, onChange, onTog
     const handleSelectAssets = (files: File[]) => {
         const formattedFiles = files.map(f => ({
             alt: f.alternativeText || f.name,
-            url: `${process.env.STRAPI_ADMIN_BACKEND_URL}/${f.url}`,
+            url: f.url,
             width: f.width,
             height: f.height,
             size: f.size,
@@ -44,14 +39,10 @@ const MediaLibComponent: FC<MediaLibComponentProps> = ({ isOpen, onChange, onTog
         onChange(formattedFiles);
     };
 
-    if (!isOpen) {
-        return null;
-    }
-
     return (
         <MediaLibraryDialog
             allowedTypes={['images']}
-            onClose={() => onToggle}
+            onClose={onClose}
             onSelectAssets={handleSelectAssets}
         />
     );

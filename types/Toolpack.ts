@@ -1,17 +1,25 @@
 import type { ToolConstructable, ToolSettings } from "@editorjs/editorjs"
 import type EditorJS from '@editorjs/editorjs';
-import type { getFetchClient } from '@strapi/strapi/admin'
+import type { getFetchClient, StrapiAppContextValue } from '@strapi/strapi/admin'
+import type { File } from './Strapi';
+
+export type FormattedFile = Pick<File, 'width' | 'height' | 'size' | 'mime' | 'formats'> & {
+    url: string
+    alt: string
+}
 
 export type FetchClient = ReturnType<typeof getFetchClient>
+
+export type MediaLibResultCallback = (data: FormattedFile[]) => void
 
 export type StrapiEditorJS = {
     pluginEndpoint: string,
     authToken: string | null,
     fetchClient: FetchClient
-    mediaLib?: {
-        toggle: (blockIndex: number) => void
-    },
-    initialData?: unknown
+    initialData?: unknown,
+    mediaLib: {
+        open: (callback: MediaLibResultCallback) => void
+    }
 }
 
 export type ToolMap = {

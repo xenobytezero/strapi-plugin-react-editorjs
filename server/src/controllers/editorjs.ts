@@ -11,11 +11,11 @@ import pluginId from '../../../admin/src/pluginId';
 import type { Core } from '@strapi/strapi';
 import type { Config } from '../../../types/Config';
 import type { GET_ToolpackValid } from '../../../types/Endpoints';
-import type { ToolpackService } from '../services/toolpack';
+import { ToolpackService } from '../services/toolpack';
 
 // ---------------------------
 
-export const DEFAULT_TOOLPACK_PACKAGE = '@xenobytezero/editorjs-default-toolpack';
+export const DEFAULT_TOOLPACK_PACKAGE = '@xenobytezero/editorjs-toolpack-default';
 
 // -------------------------------------------------
 
@@ -117,25 +117,20 @@ export class EditorJSController {
 
     async serveToolpack(ctx: Context) {
 
-        const toolpackService = strapi.plugin(pluginId).service('toolpack');
+        const toolpackService = strapi.plugin(pluginId).service<ToolpackService>('toolpack');
         const toolpackPackageName = toolpackService.getToolpackPackageName();
 
         // try and load from the config package
         let toolpackFilePath = toolpackService.tryLoadFromPackage(toolpackPackageName);
 
-        // if it has failed, and it wasn't the default, try the default
-        if (toolpackFilePath === undefined && toolpackPackageName !== DEFAULT_TOOLPACK_PACKAGE) {
-            toolpackFilePath = toolpackService.tryLoadFromPackage(DEFAULT_TOOLPACK_PACKAGE);
-        }
-
-        // if it has still failed, log and return an error
+        // if it failed, log and return an error
         if (toolpackFilePath === undefined) {
             ctx.response.status = 400;
             return;
         }
 
         // otherwise send the toolpack file
-        const fileStream = fs.createReadStream(toolpackFilePath)
+        const fileStream = fs.createReadStream(toolpackFilePath);
         ctx.response.body = fileStream;
         ctx.response.type = 'js';
         return;
@@ -148,17 +143,19 @@ export class EditorJSController {
         const toolpackService = strapi.plugin(pluginId).service<ToolpackService>('toolpack');
         const toolpackPackageName = toolpackService.getToolpackPackageName();
 
-        const ret = toolpackService.packageIsValid(toolpackPackageName);
+        // try and validate the toolpack specified in the config
+        let ret = toolpackService.packageIsValid(toolpackPackageName);
 
+        // if we are valid, just exit here
         if (ret.valid) {
             ctx.response.status = 200;
         } else {
-            ctx.response.status = 400;
+            ctx.response.status = ret.valid ? 200 : 400;
             ctx.response.body = {
                 error: {
                     message: ret.reason
                 }
-            } as GET_ToolpackValid
+            } as GET_ToolpackValid;
         }
 
     }

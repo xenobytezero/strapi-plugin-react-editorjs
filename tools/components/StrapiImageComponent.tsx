@@ -2,9 +2,11 @@ import * as React from 'react';
 
 import { useCallback, useEffect, useState, type FC } from 'react';
 
-import { isToolDataPresent, type StrapiImageToolData } from '../tools/StrapiImageTool';
+import type { StrapiImageToolData } from '../tools/StrapiImageTool';
 import type { API } from '@editorjs/editorjs';
 import type { MediaLibResultCallback, StrapiEditorJS } from '@xenobytezero/strapi-plugin-react-editorjs/types/Toolpack';
+
+import classes from './StrapiImageComponent.module.css'
 
 // --------------------------------------------
 
@@ -19,7 +21,7 @@ export type StrapiImageComponentProps = {
 
 export const StrapiImageComponent: FC<StrapiImageComponentProps> = ({ data: inputData, ejsApi, strapiEjs, onChanged }) => {
 
-    const [toolData, setToolData] = useState<Partial<StrapiImageToolData>>(inputData);
+    const [toolData, setToolData] = useState<StrapiImageToolData>(inputData);
 
     // ----------------------
 
@@ -49,6 +51,13 @@ export const StrapiImageComponent: FC<StrapiImageComponentProps> = ({ data: inpu
 
     }, []);
 
+    const updateCaption = useCallback((caption: string) => {
+        setToolData({
+            ...toolData,
+            caption: caption.length > 0 ? caption : undefined
+        })
+    }, []);
+
     // ----------------------
 
     const onMediaLibOpen = () => {
@@ -57,20 +66,31 @@ export const StrapiImageComponent: FC<StrapiImageComponentProps> = ({ data: inpu
 
     // ----------------------
 
-
-    if (!isToolDataPresent(toolData)) {
-
+    const renderSelection = () => {
         return <>
             <button className={ejsApi.styles.button} onClick={onMediaLibOpen}>Select Image...</button>
         </>
+    }
 
-    } else {
+    const renderImage = () => {
         return <>
-            <img src={toolData.file.url} />
-            <button className={ejsApi.styles.button}>Clear</button>
+            <img src={toolData.file?.url} />
+            <input
+                value={toolData.caption}
+                className={ejsApi.styles.input}
+                placeholder='Enter a caption...'
+                onInput={(ev) => updateCaption(ev.currentTarget.value)}
+            ></input>
         </>
     }
 
+    return <div className={`${classes.root} ${toolData.fullWidth ? classes.fullWidth : ''}`}>
+        {
+            toolData.file === undefined ?
+                renderSelection() :
+                renderImage()
+        }
 
+    </div>
 
 }

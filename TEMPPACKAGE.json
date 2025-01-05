@@ -1,0 +1,10 @@
+,
+"./tools/tool/*": {
+    "types": "./dist-tools/tools/*.d.ts",
+    "import": "./dist-tools/*.mjs"
+},
+"./tools/config": {
+    "types": "./dist-tools/config/index.d.ts",
+    "import": "./dist-tools/index.mjs"
+},
+"./types/*": "./dist-types/*.d.ts"

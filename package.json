@@ -16,20 +16,21 @@
         }
     },
     "dependencies": {
-        "@editorjs/editorjs": "2.30.7",
-        "@editorjs/image": "2.10.1",
-        "@editorjs/paragraph": "2.11.7",
         "@strapi/design-system": "2.0.0-rc.14",
         "@strapi/icons": "2.0.0-rc.14",
-        "@types/typography": "^0.16.8",
         "axios": "^1.4.0",
         "classnames": "^2.3.1",
         "get-file-object-from-local-path": "1.0.2",
         "open-graph-scraper": "4.9.2",
         "react-intl": "^7.0.1",
-        "typography": "^0.16.24"
+        "typography": "^0.16.24",
+        "@xenobytezero/editorjs-toolpack-default": "workspace:*"
     },
     "devDependencies": {
+        "@codexteam/icons": "^0.3.3",
+        "@editorjs/editorjs": "2.30.7",
+        "@editorjs/image": "2.10.1",
+        "@editorjs/paragraph": "2.11.7",
         "@semantic-release/changelog": "^6.0.1",
         "@semantic-release/git": "^10.0.1",
         "@strapi/design-system": "2.0.0-rc.14",
@@ -38,16 +39,20 @@
         "@strapi/upload": "5.6.0",
         "@strapi/utils": "5.6.0",
         "@types/koa": "^2.13.5",
-        "@types/react": "^18.3.13",
+        "@types/react": "^18.3.18",
         "cz-conventional-changelog": "^3.3.0",
         "prop-types": "^15.8.1",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
         "react-editor-js": "2.1.0",
+        "react-icons": "^5.4.0",
         "react-router-dom": "^7.0.2",
         "semantic-release": "^19.0.2",
         "styled-components": "^6.1.13",
-        "typescript": "5.7.2"
+        "typescript": "5.7.2",
+        "vite": "^6.0.7",
+        "vite-plugin-css-injected-by-js": "^3.5.2",
+        "vite-plugin-dts": "^4.4.0"
     },
     "engines": {
         "node": ">=10.16.0 <=18.x.x",
@@ -68,6 +73,14 @@
             "import": "./dist/server/index.mjs",
             "require": "./dist/server/index.js",
             "default": "./dist/server/index.js"
+        },
+        "./tools/tool/*": {
+            "types": "./dist-tools/tools/*.d.ts",
+            "import": "./dist-tools/*.mjs"
+        },
+        "./tools/config": {
+            "types": "./dist-tools/config/index.d.ts",
+            "import": "./dist-tools/index.mjs"
         },
         "./types/*": "./dist-types/*.d.ts"
     },
@@ -112,7 +125,9 @@
         "build": "strapi-plugin build --sourcemap",
         "verify": "strapi-plugin verify",
         "watch": "strapi-plugin watch",
-        "types": "tsc --project ./types"
+        "build:types": "tsc --project ./types",
+        "build:tools": "vite build ./tools",
+        "watch:tools": "vite build -w ./tools"
     },
     "strapi": {
         "icon": "plug",

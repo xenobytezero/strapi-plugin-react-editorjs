@@ -21,7 +21,7 @@ export class ToolpackService {
         return this._config.toolpack;
     }
 
-    resolvePackage(packageName) {
+    resolvePackage(packageName: string): string {
         // start resolution from the Strapi root rather than the plugin
         // this should correctly resolve to whatever the entrypoint of the
         // package is
@@ -30,17 +30,17 @@ export class ToolpackService {
             packagePath = require.resolve(packageName, {
                 paths: [process.cwd()]
             });
-        } catch {
-            throw new Error(`Could not find package ${packageName}`)
+        } catch (err) {
+            throw new Error(`Could not find package ${packageName}, check it is installed properly.`);
         }
 
         if (!fs.existsSync(packagePath)) {
-            throw new Error(`Failed to find entrypoint ${packagePath} for package '${packageName}'`)
+            throw new Error(`Failed to find entrypoint ${packagePath}' in package ${packageName}`)
         }
         return packagePath
     }
 
-    packageIsValid(packageName) {
+    packageIsValid(packageName: string) {
         try {
             this.resolvePackage(packageName);
             return {
@@ -55,9 +55,9 @@ export class ToolpackService {
         }
     }
 
-    tryLoadFromPackage(packageName) {
+    tryLoadFromPackage(packageName: string): string | undefined {
         try {
-            return this.resolvePackage(packageName);;
+            return this.resolvePackage(packageName);
         } catch (err) {
             console.error(`Failed to load Toolpack from package ${packageName}`);
             console.error(`Reason - ${err.message}`);

@@ -6,42 +6,33 @@ import type { API, BlockAPI, BlockTool, BlockToolConstructorOptions } from '@edi
 import type { StrapiEditorJS, FormattedFile } from '@xenobytezero/strapi-plugin-react-editorjs/types/Toolpack';
 import type { MenuConfig, MenuConfigItem } from '@editorjs/editorjs/types/tools';
 
-const MUSIC_ICON = '<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><g><path fill="none" d="M0 0h24v24H0z"></path><path d="M20 3v14a4 4 0 1 1-2-3.465V6H9v11a4 4 0 1 1-2-3.465V3h13z"></path></g></svg>'
+import { IconPicture, IconStretch, IconTrash } from '@codexteam/icons'
 
 // --------------------------------
 
-export type StrapiImageToolDataFilled = {
+export type StrapiImageToolData = {
     /**
      * Caption for the image.
      */
-    caption: string;
+    caption?: string;
 
     /**
-     * Flag indicating whether the image has a border.
+     * Flag indicating whether the image should be displayed
+     * full width.
      */
-    withBorder: boolean;
-
-    /**
-     * Flag indicating whether the image has a background.
-     */
-    withBackground: boolean;
-
-    /**
-     * Flag indicating whether the image is stretched.
-     */
-    stretched: boolean;
+    fullWidth: boolean;
 
     /**
      * Object containing the URL of the image file.
      * Also can contain any additional data.
      */
-    file: FormattedFile;
+    file?: FormattedFile
 }
 
-export type StrapiImageToolData = {} | StrapiImageToolDataFilled
+export type StrapiImageToolDataAny = {} | StrapiImageToolData
 
-export function isToolDataPresent(data: StrapiImageToolData): data is StrapiImageToolDataFilled {
-    return (data as StrapiImageToolDataFilled).file !== undefined
+export function isToolDataPresent(data: StrapiImageToolDataAny): data is StrapiImageToolData {
+    return (data as StrapiImageToolData).file !== undefined
 }
 
 // --------------------------------
@@ -52,10 +43,18 @@ export type StrapiImageToolConfig = {
 
 // --------------------------------
 
+const DEFAULT_TOOL_DATA: StrapiImageToolData = {
+    file: undefined,
+    caption: undefined,
+    fullWidth: false
+}
+
+// --------------------------------
+
 export class StrapiImageTool implements BlockTool {
 
     private _data: StrapiImageToolData;
-    private _blockApi: BlockAPI;
+    private _block: BlockAPI;
     private _config: StrapiImageToolConfig | undefined;
     private _api: API;
     private _root: HTMLDivElement | null = null;
@@ -68,14 +67,14 @@ export class StrapiImageTool implements BlockTool {
     static get toolbox() {
         return {
             title: 'Strapi Image',
-            icon: MUSIC_ICON
+            icon: IconPicture
         };
     }
 
-    constructor({ data, api, block, config }: BlockToolConstructorOptions<StrapiImageToolData, StrapiImageToolConfig>) {
+    constructor({ data, api, block, config }: BlockToolConstructorOptions<StrapiImageToolDataAny, StrapiImageToolConfig>) {
         this._api = api;
-        this._blockApi = block as BlockAPI;
-        this._data = data;
+        this._block = block;
+        this._data = isToolDataPresent(data) ? data : DEFAULT_TOOL_DATA
         this._config = config;
     }
 
@@ -85,23 +84,34 @@ export class StrapiImageTool implements BlockTool {
     }
 
     save() {
-        return this._data;
+        return { ...this._data }
     }
 
     renderSettings(): HTMLElement | MenuConfig {
-
         return [
             {
-                title: 'Stretch Image'
+                title: 'Full Width',
+                icon: IconStretch,
+                toggle: true,
+                isActive: () => this._data.fullWidth,
+                onActivate: () => {
+                    this._data = {
+                        ...this._data,
+                        fullWidth: !this._data.fullWidth
+                    }
+                    this.update();
+                }
             },
             {
-                title: 'Align Left'
-            },
-            {
-                title: 'Center'
-            },
-            {
-                title: 'Align Right'
+                title: 'Clear Image',
+                icon: IconTrash,
+                onActivate: () => {
+                    this._data = {
+                        ...this._data,
+                        file: undefined
+                    }
+                    this.update();
+                }
             }
         ] as MenuConfigItem[]
 
@@ -129,7 +139,7 @@ export class StrapiImageTool implements BlockTool {
                 strapiEjs={this._config.ejs}
                 onChanged={(newData) => {
                     this._data = newData;
-                    this._blockApi.dispatchChange();
+                    this._block.dispatchChange();
                 }}
 
             ></StrapiImageComponent>

@@ -1,19 +1,16 @@
-import { useState, useCallback, useEffect, FC, useMemo } from 'react';
+import { useState, useEffect, FC, useMemo } from 'react';
 import ReactEditorJS from '@react-editor-js/client'
-import EditorJS, { EditorConfig, OutputData } from '@editorjs/editorjs'
+import EditorJS, { OutputData } from '@editorjs/editorjs'
 import { FetchError, FieldValue, InputProps, useAuth, useFetchClient, useField, useStrapiApp } from '@strapi/strapi/admin'
-import { Typography as Typ, EmptyStateLayout, Flex, Loader, Field, Box, BoxComponent } from '@strapi/design-system';
+import { Typography as Typ, EmptyStateLayout, Flex, Loader, Field, Box, BoxComponent, Alert } from '@strapi/design-system';
 import styled from 'styled-components';
-// import Typography from 'typography'
 
 import pluginId from '../../pluginId';
-// import MediaLibComponent, { FormattedFile } from '../medialib/component';
-// import { changeFunc } from '../medialib/utils';
+import MediaLibComponent from '../medialib/component';
 
 import type { ToolMap, StrapiEditorJS, ToolpackModule, MediaLibResultCallback } from '../../../../types/Toolpack';
 import type { GET_ToolpackValid } from '../../../../types/Endpoints';
 import type { Schema } from '@strapi/strapi';
-import MediaLibComponent from '../medialib/component';
 
 // --------------------------------------
 
@@ -35,6 +32,7 @@ type ActualEditorProps = {
 const ActualEditor: FC<ActualEditorProps> = ({ tools, onAPIReady, onChange }) => {
     return <ReactEditorJS
         onChange={(api, ev) => {
+            console.log('ReactEditorJS triggered onChange');
             api.saver.save().then(output => {
                 onChange(output)
             });
@@ -74,12 +72,13 @@ const Editor: FC<EditorProps> = ({
     const [toolpackModule, setToolpackModule] = useState<ToolpackModule | null>(null);
     const [tools, setTools] = useState<ToolMap | null>(null);
     const [toolpackError, setToolpackError] = useState<string | null>(null);
+    const [attemptedFallbackToDefaultToolpack, setAttemptedFallbackToDefaultToolpack] = useState<boolean>(false);
 
     const [isMediaLibOpen, setMediaLibOpen] = useState<boolean>(false);
     const [onMediaLibResult, setOnMediaLibResult] = useState<MediaLibResultCallback | null>(null)
 
     const ejsToolpackObject = useMemo<StrapiEditorJS>(() => ({
-        pluginEndpoint: `${process.env.STRAPI_ADMIN_BACKEND_URL}/${pluginId}`,
+        pluginEndpoint: `/${pluginId}`,
         authToken: token,
         fetchClient,
         mediaLib: {
@@ -95,11 +94,11 @@ const Editor: FC<EditorProps> = ({
 
         // check if the toolpack on the server is valid
         fetchClient.get<GET_ToolpackValid>(
-            `${process.env.STRAPI_ADMIN_BACKEND_URL}${pluginId}/toolpackValid`
+            `/${pluginId}/toolpackValid`
         )
             .then((resp) => {
                 // if it's valid, load the toolpack
-                return import(/* @vite-ignore */`${process.env.STRAPI_ADMIN_BACKEND_URL}${pluginId}/toolpack`);
+                return import(/* @vite-ignore */`/${pluginId}/toolpack`);
             })
             .then(module => {
                 setToolpackModule(module);
@@ -182,6 +181,14 @@ const Editor: FC<EditorProps> = ({
         <Flex direction="column" alignItems="stretch" gap={1}>
             <Field.Label action={labelAction}>{label}</Field.Label>
             <EditorWrapper>
+                {attemptedFallbackToDefaultToolpack && <Alert
+                    title='Failed to load configured Toolpack'
+                    closeLabel='Close'
+                    onClose={() => setAttemptedFallbackToDefaultToolpack(false)}
+                    variant="warning"
+                >
+                    The plugin has fallen back to the default toolpack, so the content below may have errors. Check that the plugin configuration points at the correct Toolpack
+                </Alert>}
                 <EditorStyle>
                     {renderEditor()}
                 </EditorStyle>

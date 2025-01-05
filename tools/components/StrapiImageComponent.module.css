@@ -1,0 +1,16 @@
+.root {
+
+    margin: 24px 0;
+
+    img {
+        max-width: 70%;
+        margin: 0 auto;
+    }
+
+}
+
+.fullWidth {
+    img {
+        max-width: 100%;
+    }
+}
